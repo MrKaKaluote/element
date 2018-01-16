@@ -35,6 +35,7 @@
         @input="handleInput"
         @focus="handleFocus"
         @blur="handleBlur"
+        @keyup="handleKeyUp($event)"
       >
       <i class="el-input__icon el-icon-loading" v-if="validating"></i>
       <!-- 后置元素 -->
@@ -110,7 +111,8 @@
         type: Boolean,
         default: true
       },
-      onIconClick: Function
+      onIconClick: Function,
+      onKeyUpEvent: Function
     },
 
     computed: {
@@ -129,6 +131,14 @@
     },
 
     methods: {
+      handleKeyUp(event){
+        if (this.onKeyUpEvent) {
+          const value = this.onKeyUpEvent(this.value);
+          this.$emit('input', value);
+          this.setCurrentValue(value);
+          this.$emit('change', value);
+        }
+      },
       handleBlur(event) {
         this.$emit('blur', event);
         if (this.validateEvent) {
