@@ -131,7 +131,7 @@
     },
 
     methods: {
-      handleKeyUp(event){
+      handleKeyUp(event) {
         if (this.onKeyUpEvent) {
           const value = this.onKeyUpEvent(this.value);
           this.$emit('input', value);
