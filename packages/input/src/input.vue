@@ -8,7 +8,10 @@
       'el-input-group--append': $slots.append,
       'el-input-group--prepend': $slots.prepend
     }
-  ]">
+  ]"
+  @mouseenter="hovering = true"
+  @mouseleave="hovering = false"
+  >
     <template v-if="type !== 'textarea'">
       <!-- 前置元素 -->
       <div class="el-input-group__prepend" v-if="$slots.prepend">
@@ -24,6 +27,10 @@
           v-if="icon"
           @click="handleIconClick">
         </i>
+        <i v-if="showClear"
+           class="el-input__icon el-icon-circle-close el-input__clear"
+           @click="clear"
+        ></i>
       </slot>
       <input
         v-if="type !== 'textarea'"
@@ -71,7 +78,9 @@
     data() {
       return {
         currentValue: this.value,
-        textareaCalcStyle: {}
+        textareaCalcStyle: {},
+        hovering: false,
+        focused: false
       };
     },
 
@@ -111,6 +120,10 @@
         type: Boolean,
         default: true
       },
+      clearable: {
+        type: Boolean,
+        default: false
+      },
       onIconClick: Function,
       onKeyUpEvent: Function
     },
@@ -121,6 +134,9 @@
       },
       textareaStyle() {
         return merge({}, this.textareaCalcStyle, { resize: this.resize });
+      },
+      showClear() {
+        return this.clearable && this.currentValue !== '' && (this.focused || this.hovering);
       }
     },
 
@@ -131,6 +147,11 @@
     },
 
     methods: {
+      clear() {
+        this.$emit('input', '');
+        this.$emit('change', '');
+        this.setCurrentValue('');
+      },
       handleKeyUp(event) {
         if (this.onKeyUpEvent) {
           const value = this.onKeyUpEvent(this.value);
@@ -140,6 +161,7 @@
         }
       },
       handleBlur(event) {
+        this.focused = false;
         this.$emit('blur', event);
         if (this.validateEvent) {
           this.dispatch('ElFormItem', 'el.form.blur', [this.currentValue]);
@@ -164,6 +186,7 @@
         this.textareaCalcStyle = calcTextareaHeight(this.$refs.textarea, minRows, maxRows);
       },
       handleFocus(event) {
+        this.focused = true;
         this.$emit('focus', event);
       },
       handleInput(event) {
